@@ -1,12 +1,12 @@
-import { useRef, useContext, useEffect, useState } from 'react';
+import { useRef, useContext, useEffect, useState, useCallback } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { FilebarInitialState, initialState } from './Filebar.state';
 import { IconFolderPlus, IconMistOff, IconPlus, IconFileText } from '@tabler/icons-react';
 import { v4 as uuidv4 } from 'uuid';
-import { File } from '@/types/file';
+import { DocumentFile } from '@/types/documentFile';
 import HomeContext from '@/pages/api/home/home.context';
-import { saveFiles } from '@/utils/app/files';
-import { Files } from './components/Files';
+import { saveFiles } from '@/utils/app/documentFiles';
+import { Files } from './components/DocumentFiles';
 import FilebarContext from './Filebar.context';
 
 export const Filebar = () => {
@@ -15,7 +15,7 @@ export const Filebar = () => {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { state: {files},
+  const { state: {documentFiles, apiKey},
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -34,35 +34,50 @@ export const Filebar = () => {
     handleCreateFile(file?.name || '')
     console.log(items.length)
     console.log(file)
+
   };
 
+  const handleUpload = useCallback(
+    async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch('api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+    });
+  },
+  []
+  )
+
   const handleCreateFile = (fileName: string) => {
-    const newFile: File = {
+    const newFile: DocumentFile = {
         id: uuidv4(),
-        name: fileName || `File ${files.length + 1}`,
+        name: fileName || `DocumentFile ${documentFiles.length + 1}`,
         description: '',
         content: '',
         folderId: null,
     };
-    const updatedFiles = [...files, newFile];
-    homeDispatch({ field: 'files', value: updatedFiles });
+    const updatedFiles = [...documentFiles, newFile];
+    homeDispatch({ field: 'documentFiles', value: updatedFiles });
     saveFiles(updatedFiles);
   }
 
-  const handleRenameFile = (file: File, name: string) => {
-    const updatedFiles = files.map((f) => {
+  const handleRenameFile = (file: DocumentFile, name: string) => {
+    const updatedFiles = documentFiles.map((f) => {
       if (f.id === file.id) {
         return { ...f, name };
       }
       return f;
     });
-    homeDispatch({ field: 'files', value: updatedFiles });
+    homeDispatch({ field: 'documentFiles', value: updatedFiles });
     saveFiles(updatedFiles);
   };
 
-  const handleDeleteFile = (file: File) => {
-    const updatedFiles = files.filter((f) => f.id !== file.id);
-    homeDispatch({ field: 'files', value: updatedFiles });
+  const handleDeleteFile = (file: DocumentFile) => {
+    const updatedFiles = documentFiles.filter((f) => f.id !== file.id);
+    homeDispatch({ field: 'documentFiles', value: updatedFiles });
     saveFiles(updatedFiles);
   };
 
@@ -70,7 +85,7 @@ export const Filebar = () => {
     if (searchTerm) {
       fileDispatch({
         field: 'filteredFiles',
-        value: files.filter((file) => {
+        value: documentFiles.filter((file) => {
           const searchable =
             file.name.toLowerCase() +
             ' ' +
@@ -81,9 +96,9 @@ export const Filebar = () => {
         }),
       });
     } else {
-      fileDispatch({ field: 'filteredFiles', value: files });
+      fileDispatch({ field: 'filteredFiles', value: documentFiles });
     }
-  }, [searchTerm, files]);
+  }, [searchTerm, documentFiles]);
 
   return (
   <FilebarContext.Provider

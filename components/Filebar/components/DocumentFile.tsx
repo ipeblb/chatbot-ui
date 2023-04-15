@@ -14,17 +14,17 @@ import {
   KeyboardEvent,
 } from 'react';
 
-import { File } from '@/types/file';
+import { DocumentFile } from '@/types/documentFile';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 
 import FilebarContext from '../Filebar.context';
 
 interface Props {
-  file: File;
+  documentFile: DocumentFile;
 }
 
-export const FileComponent = ({ file }: Props) => {
+export const FileComponent = ({ documentFile }: Props) => {
   const {
     dispatch: fileDispatch,
     handleDeleteFile,
@@ -44,7 +44,7 @@ export const FileComponent = ({ file }: Props) => {
 
   const handleRename = () => {
     if (renameValue.trim().length > 0) {
-      handleRenameFile(file, renameValue);
+      handleRenameFile(documentFile, renameValue);
       setRenameValue('');
       setIsRenaming(false);
     }
@@ -53,7 +53,7 @@ export const FileComponent = ({ file }: Props) => {
   const handleConfirm: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     if (isDeleting) {
-      handleDeleteFile(file);
+      handleDeleteFile(documentFile);
       fileDispatch({ field: 'searchTerm', value: '' });
     } else if (isRenaming) {
       handleRename();
@@ -71,7 +71,7 @@ export const FileComponent = ({ file }: Props) => {
 const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     setIsRenaming(true)
-    file && setRenameValue(file.name);
+    documentFile && setRenameValue(documentFile.name);
   };
 
   const handleOpenDeleteModal: MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -79,9 +79,9 @@ const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
     setIsDeleting(true);
   };
 
-  const handleDragStart = (e: DragEvent<HTMLButtonElement>, file: File) => {
+  const handleDragStart = (e: DragEvent<HTMLButtonElement>, documentFile: DocumentFile) => {
     if (e.dataTransfer) {
-      e.dataTransfer.setData('file', JSON.stringify(file));
+      e.dataTransfer.setData('documentFile', JSON.stringify(documentFile));
     }
   };
 
@@ -111,7 +111,7 @@ const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
       <button
         className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90"
         draggable="true"
-        onDragStart={(e) => handleDragStart(e, file)}
+        onDragStart={(e) => handleDragStart(e, documentFile)}
         onMouseLeave={() => {
           setIsDeleting(false);
           setIsRenaming(false);
@@ -121,7 +121,7 @@ const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
         <IconFile size={18} />
 
         <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-12 text-left text-[12.5px] leading-3">
-          {file.name}
+          {documentFile.name}
         </div>
       </button>
 

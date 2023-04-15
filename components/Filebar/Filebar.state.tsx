@@ -1,8 +1,8 @@
-import { File } from '@/types/file'
+import { DocumentFile } from '@/types/documentFile'
 
 export interface FilebarInitialState {
     searchTerm: string;
-    filteredFiles: File[];
+    filteredFiles: DocumentFile[];
 }
 
 export const initialState: FilebarInitialState = {

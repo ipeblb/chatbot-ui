@@ -1,9 +1,9 @@
 import { FC } from 'react';
-import { File } from '@/types/file';
-import { FileComponent } from './File';
+import { DocumentFile } from '@/types/documentFile';
+import { FileComponent } from './DocumentFile';
 
 interface Props {
-  files: File[];
+  files: DocumentFile[];
 }
 
 export const Files: FC<Props> = ({ files }) => {
@@ -12,7 +12,7 @@ export const Files: FC<Props> = ({ files }) => {
       .slice()
       .reverse()
       .map((file, index) => (
-        <FileComponent key={index} file={file} />
+        <FileComponent key={index} documentFile={file} />
       ))}
   </div>;
 };

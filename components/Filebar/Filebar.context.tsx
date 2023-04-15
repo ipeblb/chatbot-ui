@@ -1,6 +1,6 @@
 import { Dispatch, createContext } from 'react';
 import { ActionType } from '@/hooks/useCreateReducer';
-import { File } from '@/types/file'
+import { DocumentFile } from '@/types/documentFile'
 import { FilebarInitialState } from "./Filebar.state";
 
 export interface FilebarContextProps {
@@ -8,8 +8,8 @@ export interface FilebarContextProps {
     dispatch: Dispatch<ActionType<FilebarInitialState>>;
     handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleButtonClick: () => void;
-    handleDeleteFile: (file: File) => void;
-    handleRenameFile: (file: File, name: string) => void;
+    handleDeleteFile: (documentFile: DocumentFile) => void;
+    handleRenameFile: (documentFile: DocumentFile, name: string) => void;
 }
 
 const FilebarContext = createContext<FilebarContextProps>(undefined!);

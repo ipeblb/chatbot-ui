@@ -1,6 +1,6 @@
-import { File } from '@/types/file'
+import { DocumentFile } from '@/types/documentFile'
 
-export const updateFile = (updatedFile: File, allFiles: File[]) => {
+export const updateFile = (updatedFile: DocumentFile, allFiles: DocumentFile[]) => {
     const updatedFiles = allFiles.map((c) => {
         if (c.id === updatedFile.id) {
         return updatedFile;
@@ -17,6 +17,6 @@ export const updateFile = (updatedFile: File, allFiles: File[]) => {
     };
     }
 
-export const saveFiles = (files: File[]) => {
+export const saveFiles = (files: DocumentFile[]) => {
     localStorage.setItem('files', JSON.stringify(files));
 }

@@ -1,4 +1,4 @@
-export interface File {
+export interface DocumentFile {
   id: string;
   name: string;
   description: string;

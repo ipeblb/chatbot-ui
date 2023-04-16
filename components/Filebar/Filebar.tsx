@@ -29,27 +29,29 @@ export const Filebar = () => {
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     handleCreateFile(file?.name || '')
-    console.log(items.length)
-    console.log(file)
-
+    const data = file && await handleUpload(file)
+    const index = data.index
+    console.log(index)
+    // localStorage.setItem('vectorstore', JSON.stringify())
   };
 
-  const handleUpload = useCallback(
-    async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      const response = await fetch('api/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+  const handleUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('api/upload', {
+      method: 'POST',
+      body: formData,
     });
-  },
-  []
-  )
+    console.log(response)
+    if (response.ok) {
+      const data = await response.json();
+      console.log('File uploaded successfully');
+      return data;
+    }
+  };
 
   const handleCreateFile = (fileName: string) => {
     const newFile: DocumentFile = {

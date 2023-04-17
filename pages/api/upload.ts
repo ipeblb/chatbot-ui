@@ -8,6 +8,12 @@ import { docFromPdf } from '@/utils/server/createIndex';
 // @ts-expect-error
 import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 
+const tempDir = join(process.cwd(), 'temp');
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir);
+}
+
+
 export const config = {
   api: {
     bodyParser: false,

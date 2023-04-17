@@ -35,7 +35,7 @@ export const Filebar = () => {
     const data = file && await handleUpload(file)
     const index = data.index
     console.log(index)
-    // localStorage.setItem('vectorstore', JSON.stringify())
+    localStorage.setItem('vectorstore', JSON.stringify(index))
   };
 
   const handleUpload = async (file: File) => {

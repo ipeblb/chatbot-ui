@@ -2,7 +2,6 @@ import { useRef, useContext, useEffect, useState, useCallback } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { FilebarInitialState, initialState } from './Filebar.state';
 import { IconFolderPlus, IconMistOff, IconPlus, IconFileText } from '@tabler/icons-react';
-import { v4 as uuidv4 } from 'uuid';
 import { DocumentFile } from '@/types/documentFile';
 import HomeContext from '@/pages/api/home/home.context';
 import { saveFiles } from '@/utils/app/documentFiles';
@@ -38,6 +37,7 @@ export const Filebar = () => {
       handleCreateFile(file?.name || '', data.fileId)
       localStorage.setItem('vectorstore', JSON.stringify(index))
     }
+    event.target.value = '';
   };
 
   const handleUpload = async (file: File) => {

@@ -24,5 +24,6 @@ export const qaTemplate = ChatPromptTemplate.fromPromptMessages([
 {context}
 
 Question: {question}
+please answer in Japanese.
 Helpful Answer:`
   )])

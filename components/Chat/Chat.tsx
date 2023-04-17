@@ -21,7 +21,7 @@ import {
 import { throttle } from '@/utils/data/throttle';
 
 import { ChatBody, Conversation, Message, MessageToSendBody } from '@/types/chat';
-import { Plugin } from '@/types/plugin';
+import { Plugin, PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -114,16 +114,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           prompt: updatedConversation.prompt,
           temperature: updatedConversation.temperature
         };
-        const vectorStore = getMemoryVector();
-        const endpoint = getEndpoint(plugin, vectorStore);
+        const endpoint = getEndpoint(plugin);
         let body;
-        if (vectorStore) {
+        if (!plugin) {
+          body = JSON.stringify(chatBody);
+        } else if(plugin.id === PluginID.CHAT_DOCUMENT) {
+          const vectorStore = getMemoryVector();
           body = JSON.stringify({
             ...chatBody,
             vectorStore,
           });
-        } else if (!plugin) {
-          body = JSON.stringify(chatBody);
         } else {
           body = JSON.stringify({
             ...chatBody,
@@ -156,7 +156,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           homeDispatch({ field: 'messageIsStreaming', value: false });
           return;
         }
-        if (!plugin) {
+        if (!plugin || plugin.id === PluginID.CHAT_DOCUMENT) {
           if (updatedConversation.messages.length === 1) {
             const { content } = message;
             const customName =

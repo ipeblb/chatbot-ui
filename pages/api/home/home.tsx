@@ -68,7 +68,8 @@ const Home = ({
       conversations,
       selectedConversation,
       prompts,
-      temperature
+      temperature,
+      documentFiles,
     },
     dispatch,
   } = contextValue;
@@ -307,6 +308,11 @@ const Home = ({
       );
 
       dispatch({ field: 'conversations', value: cleanedConversationHistory });
+
+      const documentFiles = localStorage.getItem('files');
+      if (documentFiles) {
+        dispatch({ field: 'documentFiles', value: JSON.parse(documentFiles) });
+      }
     }
 
     const selectedConversation = localStorage.getItem('selectedConversation');

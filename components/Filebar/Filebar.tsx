@@ -1,7 +1,7 @@
 import { useRef, useContext, useEffect, useState, useCallback } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { FilebarInitialState, initialState } from './Filebar.state';
-import { IconFolderPlus, IconMistOff, IconPlus, IconFileText } from '@tabler/icons-react';
+import { IconMistOff, IconPlus, IconLoader } from '@tabler/icons-react';
 import { DocumentFile } from '@/types/documentFile';
 import HomeContext from '@/pages/api/home/home.context';
 import { saveFiles } from '@/utils/app/documentFiles';
@@ -13,6 +13,8 @@ export const Filebar = () => {
     initialState,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const { state: {documentFiles, apiKey},
     dispatch: homeDispatch,
@@ -29,8 +31,15 @@ export const Filebar = () => {
     fileInputRef.current?.click();
   };
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLoading(true);
     const file = event.target.files?.[0];
     if (file) {
+      if (file.type !== 'application/pdf') {
+        setError('Only PDF files are supported');
+        setLoading(false);
+        return;
+      }
+      setError('');
       const data = file && await handleUpload(file)
       const index = data.index
       console.log(index)
@@ -38,6 +47,7 @@ export const Filebar = () => {
       localStorage.setItem('vectorstore', JSON.stringify(index))
     }
     event.target.value = '';
+    setLoading(false);
   };
 
   const handleUpload = async (file: File) => {
@@ -118,6 +128,7 @@ export const Filebar = () => {
     <input
       type="file"
       ref={fileInputRef}
+      accept=".pdf"
       style={{ display: 'none' }}
       onChange={handleFileChange}
     />
@@ -128,6 +139,7 @@ export const Filebar = () => {
       <IconPlus size={16} />
       New Document
     </button>
+    {error && <p className="text-red-500">{error}</p>}
     <div className="flex-grow overflow-auto">
         {items?.length > 0 ? (
             <div
@@ -143,6 +155,9 @@ export const Filebar = () => {
               </span>
             </div>
           )}
+        {loading && (
+          <IconLoader className="mx-auto mb-3" />
+        )}
     </div>
   </div>
   </FilebarContext.Provider>

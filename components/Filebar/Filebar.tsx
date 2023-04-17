@@ -31,11 +31,13 @@ export const Filebar = () => {
   };
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    handleCreateFile(file?.name || '')
-    const data = file && await handleUpload(file)
-    const index = data.index
-    console.log(index)
-    localStorage.setItem('vectorstore', JSON.stringify(index))
+    if (file) {
+      handleCreateFile(file?.name || '')
+      const data = file && await handleUpload(file)
+      const index = data.index
+      console.log(index)
+      localStorage.setItem('vectorstore', JSON.stringify(index))
+    }
   };
 
   const handleUpload = async (file: File) => {

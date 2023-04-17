@@ -1,6 +1,10 @@
 import { Plugin, PluginID } from '@/types/plugin';
+import { MemoryVector } from '@/types/memoryVector';
 
-export const getEndpoint = (plugin: Plugin | null) => {
+export const getEndpoint = (plugin: Plugin | null, vectorstore: MemoryVector[] | null) => {
+  if (vectorstore) {
+    return 'api/chatQA';
+  }
   if (!plugin) {
     return 'api/chat';
   }

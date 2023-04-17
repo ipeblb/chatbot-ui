@@ -6,6 +6,7 @@ import { ChatQABody, Message } from '@/types/chat';
 import { ConversationalRetrievalQAChain, LLMChain, loadQAStuffChain } from "langchain/chains"
 import { ChatOpenAI } from "langchain/chat_models/openai"
 import { retrieverFromMemoryVectors } from '@/utils/server/createIndex';
+import { CallbackManager } from 'langchain/callbacks';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -23,14 +24,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let chat_history: string[] = [];
     const question = messages.slice(-1)[0].content
-    console.log(question)
     chat_history = messages.slice(0,-1).map(x => x.content)
 
-    const streamingLLM = new ChatOpenAI({modelName: model.id ,temperature: temperatureToUse, streaming: true})
+    const streamingLLM = new ChatOpenAI({
+      modelName: model.id ,temperature: temperatureToUse, streaming: true,
+      callbackManager: CallbackManager.fromHandlers({
+        async handleLLMNewToken(token: string) {
+          res.write(`${token}`);
+        }
+      })
+    })
     const combineDocumentsChain = loadQAStuffChain(streamingLLM, {prompt: qaTemplate})
 
     const llm = new ChatOpenAI({modelName: model.id ,temperature: temperatureToUse})
     const questionGeneratorChain = new LLMChain({llm: llm, prompt: questionGeneratorTemplate})
+    res.writeHead(200, {
+      'Content-Type': 'application/octet-stream',
+      'Transfer-Encoding': 'chunked',
+    })
     const chain = new ConversationalRetrievalQAChain(
       {
         retriever: retrieverFromMemoryVectors(vectorStore),
@@ -41,8 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const response = await chain.call({
       question, chat_history
     })
-    console.log(response)
-    res.status(200)
+    res.end()
   } catch (error) {
     console.error(error);
     if (error instanceof OpenAIError) {

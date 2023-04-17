@@ -8,6 +8,14 @@ import { ChatOpenAI } from "langchain/chat_models/openai"
 import { retrieverFromMemoryVectors } from '@/utils/server/createIndex';
 import { CallbackManager } from 'langchain/callbacks';
 
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '5mb'
+        }
+    }
+}
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { model, messages, key, prompt, temperature, vectorStore } = (await req.body) as ChatQABody;
@@ -52,15 +60,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const response = await chain.call({
       question, chat_history
     })
-    res.end()
+    console.log(response)
   } catch (error) {
     console.error(error);
-    if (error instanceof OpenAIError) {
-      return new Response('Error', { status: 500, statusText: error.message });
-    } else {
-      return new Response('Error', { status: 500 });
-    }
+    res.status(500).json({ error: "Internal Server Error" });
   }
+  res.end()
 };
 
 export default handler;

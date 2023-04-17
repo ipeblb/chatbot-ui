@@ -38,9 +38,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const tempFilePath = join(process.cwd(), 'temp', file.newFilename);
     fs.renameSync(file.filepath, tempFilePath);
-    const index = await docFromPdf(tempFilePath)
+    const index = await docFromPdf(tempFilePath, file.newFilename)
     fs.unlinkSync(tempFilePath);
-    res.status(200).json({index})
+    res.status(200).json({index, fileId: file.newFilename})
   } catch (error) {
     console.log(error)
     res.status(500).json({ error: "Error" });

@@ -7,9 +7,12 @@ import * as pdfjs from "pdfjs-dist/legacy/build/pdf";
 pdfjs.GlobalWorkerOptions.workerSrc = "pdfjs-dist/legacy/build/pdf.worker.js";
 
 
-export const docFromPdf = async (filePath: string) => {
+export const docFromPdf = async (filePath: string, originalName: string) => {
   const loader = new PDFLoader(filePath)
   const docs = await loader.load()
+  for (const doc of docs) {
+    doc.metadata.originalName = originalName;
+  }
   const vectorStore = await MemoryVectorStore.fromDocuments(
     docs, new OpenAIEmbeddings()
   )

@@ -32,10 +32,10 @@ export const Filebar = () => {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      handleCreateFile(file?.name || '')
       const data = file && await handleUpload(file)
       const index = data.index
       console.log(index)
+      handleCreateFile(file?.name || '', data.fileId)
       localStorage.setItem('vectorstore', JSON.stringify(index))
     }
   };
@@ -55,9 +55,9 @@ export const Filebar = () => {
     }
   };
 
-  const handleCreateFile = (fileName: string) => {
+  const handleCreateFile = (fileName: string, fileId: string) => {
     const newFile: DocumentFile = {
-        id: uuidv4(),
+        id: fileId,
         name: fileName || `DocumentFile ${documentFiles.length + 1}`,
         description: '',
         content: '',

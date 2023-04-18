@@ -15,7 +15,7 @@ import {
 } from 'react';
 
 import { DocumentFile } from '@/types/documentFile';
-
+import { getMemoryVector } from '@/utils/app/memoryVector';
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 
 import FilebarContext from '../Filebar.context';
@@ -53,8 +53,10 @@ export const FileComponent = ({ documentFile }: Props) => {
   const handleConfirm: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     if (isDeleting) {
+      handleDeleteMemoryVector();
       handleDeleteFile(documentFile);
       fileDispatch({ field: 'searchTerm', value: '' });
+      fileDispatch({ field: 'fileBarError', value: '' });
     } else if (isRenaming) {
       handleRename();
     }
@@ -62,13 +64,24 @@ export const FileComponent = ({ documentFile }: Props) => {
     setIsRenaming(false);
   };
 
-    const handleCancel: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleDeleteMemoryVector = () => {
+    const memoryVector = getMemoryVector();
+    if (memoryVector) {
+      const newMemoryVector = memoryVector.filter(
+        (vector) => vector.metadata.originalName !== documentFile.id
+      );
+      localStorage.setItem('vectorstore', JSON.stringify(newMemoryVector));
+    }
+  };
+
+
+  const handleCancel: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     setIsDeleting(false);
     setIsRenaming(false);
   };
 
-const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     setIsRenaming(true)
     documentFile && setRenameValue(documentFile.name);

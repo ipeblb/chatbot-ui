@@ -7,7 +7,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import { saveFiles } from '@/utils/app/documentFiles';
 import { Files } from './components/DocumentFiles';
 import FilebarContext from './Filebar.context';
-
+import { getMemoryVector, overMaxMemoryVectorSize } from '@/utils/app/memoryVector';
 export const Filebar = () => {
   const fileBarContextValue = useCreateReducer<FilebarInitialState>({
     initialState,
@@ -21,7 +21,7 @@ export const Filebar = () => {
   } = useContext(HomeContext);
 
   const {
-    state: { searchTerm, filteredFiles },
+    state: { searchTerm, filteredFiles, fileBarError },
     dispatch: fileDispatch,
   } = fileBarContextValue;
 
@@ -43,8 +43,15 @@ export const Filebar = () => {
       const data = file && await handleUpload(file)
       const index = data.index
       console.log(index)
-      handleCreateFile(file?.name || '', data.fileId)
-      localStorage.setItem('vectorstore', JSON.stringify(index))
+      const memoryVector = getMemoryVector() || []
+      const newMemoryVector = [...memoryVector, ...index]
+      if (overMaxMemoryVectorSize(newMemoryVector)) {
+        fileDispatch({ field: 'fileBarError', value: 'You have reached the maximum size of files you can upload. Please delete some files to upload more.' })
+      } else {
+        localStorage.setItem('vectorstore', JSON.stringify(newMemoryVector))
+        handleCreateFile(file?.name || '', data.fileId)
+      }
+
     }
     event.target.value = '';
     setLoading(false);
@@ -140,6 +147,7 @@ export const Filebar = () => {
       New Document
     </button>
     {error && <p className="text-red-500">{error}</p>}
+    {fileBarError && <p className="text-red-500">{fileBarError}</p>}
     <div className="flex-grow overflow-auto">
         {items?.length > 0 ? (
             <div

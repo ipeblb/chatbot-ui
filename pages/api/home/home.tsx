@@ -68,7 +68,8 @@ const Home = ({
       conversations,
       selectedConversation,
       prompts,
-      temperature
+      temperature,
+      documentFiles,
     },
     dispatch,
   } = contextValue;
@@ -275,6 +276,7 @@ const Home = ({
 
     if (window.innerWidth < 640) {
       dispatch({ field: 'showChatbar', value: false });
+      dispatch({ field: 'showPromptbar', value: false });
     }
 
     const showChatbar = localStorage.getItem('showChatbar');
@@ -306,6 +308,11 @@ const Home = ({
       );
 
       dispatch({ field: 'conversations', value: cleanedConversationHistory });
+
+      const documentFiles = localStorage.getItem('files');
+      if (documentFiles) {
+        dispatch({ field: 'documentFiles', value: JSON.parse(documentFiles) });
+      }
     }
 
     const selectedConversation = localStorage.getItem('selectedConversation');

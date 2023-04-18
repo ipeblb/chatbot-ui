@@ -20,8 +20,8 @@ import {
 } from '@/utils/app/conversation';
 import { throttle } from '@/utils/data/throttle';
 
-import { ChatBody, Conversation, Message } from '@/types/chat';
-import { Plugin } from '@/types/plugin';
+import { ChatBody, Conversation, Message, MessageToSendBody } from '@/types/chat';
+import { Plugin, PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -33,6 +33,7 @@ import { ErrorMessageDiv } from './ErrorMessageDiv';
 import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
+import { getMemoryVector } from '@/utils/app/memoryVector';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -93,9 +94,22 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
+        const messageToSendBody: MessageToSendBody = {
+          prompt: updatedConversation.prompt,
+          messages: updatedConversation.messages,
+          model: updatedConversation.model
+        };
+        const messageToSendRes = await fetch('/api/messagesToSend', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(messageToSendBody),
+        });
+        const messageToSend = await messageToSendRes.json() as Message[];
         const chatBody: ChatBody = {
           model: updatedConversation.model,
-          messages: updatedConversation.messages,
+          messages: messageToSend,
           key: apiKey,
           prompt: updatedConversation.prompt,
           temperature: updatedConversation.temperature
@@ -104,6 +118,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let body;
         if (!plugin) {
           body = JSON.stringify(chatBody);
+        } else if(plugin.id === PluginID.CHAT_DOCUMENT) {
+          const vectorStore = getMemoryVector();
+          body = JSON.stringify({
+            ...chatBody,
+            vectorStore,
+          });
         } else {
           body = JSON.stringify({
             ...chatBody,
@@ -136,7 +156,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           homeDispatch({ field: 'messageIsStreaming', value: false });
           return;
         }
-        if (!plugin) {
+        if (!plugin || plugin.id === PluginID.CHAT_DOCUMENT) {
           if (updatedConversation.messages.length === 1) {
             const { content } = message;
             const customName =
